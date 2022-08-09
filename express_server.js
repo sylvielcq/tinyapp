@@ -69,6 +69,12 @@ app.get("/u/:id", (req, res) => {
   res.redirect(urlDatabase[req.params.id]);
 });
 
+// GET Catchall
+app.get('*', (req, res) => {
+  res.StatusCode = 404;
+  res.render("Error: the page doesn't exist.")
+});
+
 // Server LISTEN
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
