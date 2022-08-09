@@ -9,6 +9,7 @@ const generateRandomString = function() {
   return result;
 };
 
+// Database
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -54,6 +55,12 @@ app.post("/urls", (req, res) => {
   urlDatabase[randomString] = req.body.longURL;
   console.log(req.body); // Log the POST request body to the console
   res.redirect(`/urls/${randomString}`);
+});
+
+// POST /urls/:id/delete
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
 });
 
 // GET /urls/:id
