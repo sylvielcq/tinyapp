@@ -72,7 +72,7 @@ app.get("/u/:id", (req, res) => {
 // GET Catchall
 app.get('*', (req, res) => {
   res.StatusCode = 404;
-  res.render("Error: the page doesn't exist.")
+  res.render("Error: the page doesn't exist.");
 });
 
 // Server LISTEN
