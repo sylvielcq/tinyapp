@@ -102,6 +102,11 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
+// Login page
+app.get("/login", (req, res) => {
+  res.render("login");
+})
+
 // Page to create a new URL
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies["user_id"]];
