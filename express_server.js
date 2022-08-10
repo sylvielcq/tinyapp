@@ -71,6 +71,10 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
+  if (!req.body.email || !req.body.password) {
+    res.statusCode = 400;
+    res.send("ERROR: Email or Password cannot be empty. Please try again.")
+  }
   let randomId = generateRandomString();
   let newEmail = req.body.email;
   let newPassword = req.body.password;
@@ -139,7 +143,7 @@ app.get("/u/:id", (req, res) => {
 // GET Catchall
 app.get('/*', (req, res) => {
   res.StatusCode = 404;
-  res.render("Error: the page doesn't exist.");
+  res.send("Error: the page doesn't exist.");
 });
 
 // Server LISTEN
