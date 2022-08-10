@@ -104,7 +104,9 @@ app.post("/register", (req, res) => {
 
 // Login page
 app.get("/login", (req, res) => {
-  res.render("login");
+  const user = users[req.cookies["user_id"]];
+  const templateVars = { user: user };
+  res.render("login", templateVars);
 })
 
 // Page to create a new URL
