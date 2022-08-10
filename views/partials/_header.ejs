@@ -19,19 +19,19 @@
       </div>
     </div>
     <% if (!user) { %>
-    <form class="form-inline justify-content-right" action="/login" method="POST">
-      <input
-        class="form-control"
-        type="text"
-        name="user_id"
-        placeholder="Username"
-        style="width: 250px; margin: 0.5em"
-      />
-      <button type="submit" class="btn btn-outline-dark">Login</button>
-    </form>
-    <% } else { %>
+      <span class="navbar-text">
+        <div class="pr-3">
+          <a href="/register">Register</a>
+        </div>
+      </span>
+      <span class="navbar-text">
+        <div class="pr-3">
+          <a href="/login">Login</a>
+        </div>
+      </span>
+    <% } %>
+    <% if (user) { %>
       <form class="form-inline" action="/logout" method="POST">
-        <p style="margin-top: 1em; padding-right: 1em; font-size:16px;">Logged in as: <%= user.email %>!</p>
         <button type="submit" class="btn btn-outline-dark">Logout</button>
       </form>
     <% } %>
