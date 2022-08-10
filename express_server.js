@@ -49,6 +49,12 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+// POST /login
+app.post("/login", (req, res) => {
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
+});
+
 // POST /urls
 // Generates a short URL ID, stores it with the long URL gotten from the user form in the UrlDatabase.
 // Redirects user to /urls/:id
