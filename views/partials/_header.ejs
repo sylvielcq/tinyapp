@@ -18,12 +18,12 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <% if (!username) { %>
+    <% if (!user) { %>
     <form class="form-inline justify-content-right" action="/login" method="POST">
       <input
         class="form-control"
         type="text"
-        name="username"
+        name="user_id"
         placeholder="Username"
         style="width: 250px; margin: 0.5em"
       />
@@ -31,7 +31,7 @@
     </form>
     <% } else { %>
       <form class="form-inline" action="/logout" method="POST">
-        <p style="margin-top: 1em; padding-right: 1em; font-size:16px;">Logged in as: <%= username %>!</p>
+        <p style="margin-top: 1em; padding-right: 1em; font-size:16px;">Logged in as: <%= user.email %>!</p>
         <button type="submit" class="btn btn-outline-dark">Logout</button>
       </form>
     <% } %>
