@@ -40,13 +40,17 @@ app.get("/hello", (req, res) => {
 // GET /urls
 // Using an Object to send the UrlDatabase to the EJS template
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { 
+    username: req.cookies["username"],
+    urls: urlDatabase
+  };
   res.render("urls_index", templateVars);
 });
 
 // GET /urls/new
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = { username: req.cookies["username"] }
+  res.render("urls_new", templateVars);
 });
 
 // POST /login
@@ -80,7 +84,11 @@ app.post("/urls/:id/delete", (req, res) => {
 // GET /urls/:id
 // User redirected here after submitting a long URL through the form on /urls
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = { 
+    username: req.cookies["username"],
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id] 
+  };
   res.render("urls_show", templateVars);
 });
 
