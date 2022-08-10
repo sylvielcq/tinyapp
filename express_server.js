@@ -4,10 +4,20 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = 8080; // default port 8080
 
-// Used during Post request to generate short URLs IDs
+// Helper function that generate short URLs IDs
 const generateRandomString = function() {
   const result = Math.random().toString(36).slice(2, 8);
   return result;
+};
+
+// Helper function that checks if an email already exists in the users database
+const getUserByEmail = function(email) {
+  for (let user in users) {
+    if (users[user]["email"] === email) {
+      return users[user];
+    }
+  }
+  return null;
 };
 
 // Users database
@@ -74,6 +84,10 @@ app.post("/register", (req, res) => {
   if (!req.body.email || !req.body.password) {
     res.statusCode = 400;
     res.send("ERROR: Email or Password cannot be empty. Please try again.")
+  }
+  if (getUserByEmail(req.body.email) !== null) {
+    res.statusCode = 400;
+    res.send("ERROR: This email is already registered. Please log in.")
   }
   let randomId = generateRandomString();
   let newEmail = req.body.email;
