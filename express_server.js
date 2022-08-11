@@ -160,14 +160,15 @@ app.get("/login", (req, res) => {
 // LOGIN handler
 app.post("/login", (req, res) => {
   const userLookup = getUserByEmail(req.body.email);
+  const passwordCheck = bcrypt.compareSync(req.body.password, userLookup.password);
 
-  if (userLookup === null) {
+  if (userLookup === null) {    // If the email doesn't exist in the Users database
     res.statusCode = 403;
     return res.send("We cannot find an account with this email address. Please try again, or register a new Account.");
   }
 
-  if (userLookup !== null) {
-    if (req.body.password !== userLookup.password) {
+  if (userLookup !== null) {    // If the email exists in the Users database
+    if (!passwordCheck) {    // If the password doesn't match with the password in the database
       res.statusCode = 403;
       return res.send("Incorrect password. Please try again.");
     }
