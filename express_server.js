@@ -68,8 +68,8 @@ app.get("/hello", (req, res) => {
 
 // REGISTER page
 app.get("/register", (req, res) => {
-  if (req.cookies["user_id"]) {
-    res.redirect("/urls");
+  if (req.cookies["user_id"]) {    // Checking if user is already logged in
+    return res.redirect("/urls");
   }
   const user = users[req.cookies["user_id"]];
   const templateVars = { user: user };
@@ -101,8 +101,8 @@ app.post("/register", (req, res) => {
 
 // LOGIN page
 app.get("/login", (req, res) => {
-  if (req.cookies["user_id"]) {
-    res.redirect("/urls");
+  if (req.cookies["user_id"]) {    // Checking if user is already logged in
+    return res.redirect("/urls");
   }
   const user = users[req.cookies["user_id"]];
   const templateVars = { user: user };
@@ -134,6 +134,9 @@ app.post("/logout", (req, res) => {
 
 // NEW URL page
 app.get("/urls/new", (req, res) => {
+  if (!req.cookies["user_id"]) {    // Checking if user is not logged in
+    return res.redirect("/login");
+  }
   const user = users[req.cookies["user_id"]];
   const templateVars = { user: user };
   res.render("urls_new", templateVars);
@@ -141,6 +144,9 @@ app.get("/urls/new", (req, res) => {
 
 // NEW URL handler
 app.post("/urls", (req, res) => {
+  if (!req.cookies["user_id"]) {    // Checking if user is not logged in
+    return res.send("Please log in to create tiny URLs!");
+  }
   let randomString = generateRandomString();
   urlDatabase[randomString] = req.body.longURL;
   console.log(req.body); // Log the POST request body to the console
@@ -182,6 +188,10 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // REDIRECTING short URLs to their long URLs
 app.get("/u/:id", (req, res) => {
+  if (!urlDatabase[req.params.id]) {
+    res.StatusCode = 404;
+    return res.send("Error: this Tiny URL doesn't exist.");
+  }
   res.redirect(urlDatabase[req.params.id]);
 });
 
