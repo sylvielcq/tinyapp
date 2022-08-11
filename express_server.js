@@ -77,11 +77,11 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   if (!req.body.email || !req.body.password) {
     res.statusCode = 400;
-    res.send("ERROR: Email or Password cannot be empty. Please try again.")
+    res.send("ERROR: Email or Password cannot be empty. Please try again.");
   }
   if (getUserByEmail(req.body.email) !== null) {
     res.statusCode = 400;
-    res.send("ERROR: This email is already registered. Please log in.")
+    res.send("ERROR: This email is already registered. Please log in.");
   }
   let randomId = generateRandomString();
   let newEmail = req.body.email;
@@ -101,19 +101,19 @@ app.get("/login", (req, res) => {
   const user = users[req.cookies["user_id"]];
   const templateVars = { user: user };
   res.render("login", templateVars);
-})
+});
 
 // LOGIN handler
 app.post("/login", (req, res) => {
   const userLookup = getUserByEmail(req.body.email);
   if (userLookup === null) {
     res.statusCode = 403;
-    res.send("We cannot find an account with this email address. Please try again, or register a new Account.")
+    res.send("We cannot find an account with this email address. Please try again, or register a new Account.");
   }
   if (userLookup !== null) {
     if (req.body.password !== userLookup.password) {
       res.statusCode = 403;
-      res.send("Incorrect password. Please try again.")
+      res.send("Incorrect password. Please try again.");
     }
     res.cookie("user_id", userLookup.id);
     res.redirect("/urls");
