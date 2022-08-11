@@ -37,7 +37,7 @@
           <% for (let id in urls) { %>
             <tr>
               <td><%= id %></td>
-              <td><%= urls[id] %></td>
+              <td><%= urls[id].longURL %></td>
               <td>
                 <form action="/urls/<%= id %>">
                   <button type="edit" class="btn btn-outline-primary">Edit</button>
@@ -52,11 +52,6 @@
           <% } %>
         </tbody>
       </table>
-      <div>
-        <p>
-          <a href="#">Shorten a new URL</a>
-        </p>
-      </div>
     </main>
     <!-- Bootstrap JS -->
     <script

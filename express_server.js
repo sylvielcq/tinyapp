@@ -41,8 +41,14 @@ const users = {
 
 // URLS DATABASE
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW"
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
+  }
 };
 
 // MIDDLEWARE
@@ -147,10 +153,15 @@ app.post("/urls", (req, res) => {
   if (!req.cookies["user_id"]) {    // Checking if user is not logged in
     return res.send("Please log in to create tiny URLs!");
   }
-  let randomString = generateRandomString();
-  urlDatabase[randomString] = req.body.longURL;
-  console.log(req.body); // Log the POST request body to the console
-  res.redirect(`/urls/${randomString}`);
+  let id = generateRandomString();
+  let newUserId = req.cookies["user_id"];
+  let newLongURL = req.body.longURL
+  urlDatabase[id] = {
+    longURL: newLongURL,
+    userID: newUserId
+  };
+  console.log("URl database after creating new URL: ", urlDatabase)
+  res.redirect(`/urls/${id}`);
 });
 
 // URLS INDEX page
@@ -168,15 +179,16 @@ app.get("/urls/:id", (req, res) => {
   const user = users[req.cookies["user_id"]];
   const templateVars = {
     user: user,
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id]
+    id: req.params["id"],
+    longURL: urlDatabase[req.params.id].longURL
   };
+  console.log("TemplateVars on spec URL page: ", templateVars)
   res.render("urls_show", templateVars);
 });
 
 // UPDATE URL handler
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
+  urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect("/urls");
 });
 
@@ -188,11 +200,12 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // REDIRECTING short URLs to their long URLs
 app.get("/u/:id", (req, res) => {
-  if (!urlDatabase[req.params.id]) {
+  let id = req.params.id;
+  if (!urlDatabase[id]) {
     res.StatusCode = 404;
     return res.send("Error: this Tiny URL doesn't exist.");
   }
-  res.redirect(urlDatabase[req.params.id]);
+  res.redirect(urlDatabase[id].longURL);
 });
 
 // CATCHALL for pages that don't exist
