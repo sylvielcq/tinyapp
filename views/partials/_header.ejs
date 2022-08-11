@@ -31,12 +31,8 @@
       </span>
     <% } %>
     <% if (user) { %>
-      <span class="navbar-text">
-        <div class="pr-3">
-          <p>Logged in as: <%= user.email %>!</p>
-        </div>
-      </span>
       <form class="form-inline" action="/logout" method="POST">
+        <p style="margin-top: 1em; padding-right: 1em; font-size:16px;">Logged in as: <%= user.email %>!</p>
         <button type="submit" class="btn btn-outline-dark">Logout</button>
       </form>
     <% } %>
