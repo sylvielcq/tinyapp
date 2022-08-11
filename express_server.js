@@ -1,22 +1,23 @@
 const express = require("express");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080; // default port 8080
 
 
 // USERS DATABASE
 const users = {
-  aJ48lW: {
-    id: "aJ48lW",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+  UEheRY: {
+    id: 'UEheRY',
+    email: 'test@test.com',
+    password: '$2a$10$zQtq1G7F0PYhDjHEP.QfEeJCXuGxwfZYMAd.lsS/N74r9QH/JnjM.'
   },
-  test12: {
-    id: "test12",
-    email: "123@123.com",
-    password: "123",
-  },
+  IzA8hG: {
+    id: 'IzA8hG',
+    email: '123@123.com',
+    password: '$2a$10$QTy5jDEzJijEF5LbH7zlmOLpu2WeJmd2RNH6LSNup5N47/6.lk2iO'
+  }
 };
 
 
@@ -24,11 +25,11 @@ const users = {
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
-    userID: "aJ48lW"
+    userID: "UEheRY"
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
-    userID: "aJ48lW"
+    userID: "IzA8hG"
   }
 };
 
@@ -124,13 +125,22 @@ app.post("/register", (req, res) => {
     return res.send("ERROR: This email is already registered. Please log in.");
   }
 
-  users[randomId] = {
-    id: randomId,
-    email: newEmail,
-    password: newPassword
-  };
-  res.cookie("user_id", randomId);
-  res.redirect("/urls");
+  bcrypt.genSalt(10)
+    .then((salt) => {
+      console.log("salt :", salt);
+      return bcrypt.hashSync(newPassword, salt);
+    })
+    .then((hash) => {
+      console.log("hash :", hash);
+      users[randomId] = {
+        id: randomId,
+        email: newEmail,
+        password: hash
+      };
+      console.log("users db :", users);
+      res.cookie("user_id", randomId);
+      res.redirect("/urls");
+    })
 });
 
 
@@ -184,7 +194,7 @@ app.get("/urls", (req, res) => {
   };
 
   if (!user) {    // Checking if user is not logged in
-    res.render("not_logged_in", templateVars);
+    return res.render("not_logged_in", templateVars);
   }
 
   res.render("urls_index", templateVars);
