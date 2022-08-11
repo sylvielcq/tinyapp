@@ -213,16 +213,20 @@ app.post("/urls/:id/delete", (req, res) => {
 app.get("/u/:id", (req, res) => {
   let id = req.params.id;
   if (!urlDatabase[id]) {
+    let user = users[req.cookies["user_id"]];
+    const templateVars = { user: user };
     res.StatusCode = 404;
-    return res.send("Error: this Tiny URL doesn't exist.");
+    res.render("404", templateVars);
   }
   res.redirect(urlDatabase[id].longURL);
 });
 
 // CATCHALL for pages that don't exist
 app.get('/*', (req, res) => {
+  let user = users[req.cookies["user_id"]];
+  const templateVars = { user: user };
   res.StatusCode = 404;
-  res.send("Error: the page doesn't exist.");
+  res.render("404", templateVars);
 });
 
 // Server LISTEN
