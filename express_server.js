@@ -6,7 +6,12 @@ const PORT = 8080; // default port 8080
 
 // Helper function that generate short URLs IDs
 const generateRandomString = function() {
-  const result = Math.random().toString(36).slice(2, 8);
+  let alphNum = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    let j = Math.floor(Math.random() * (alphNum.length - 1));
+    result += alphNum[j];
+  }
   return result;
 };
 
@@ -20,7 +25,7 @@ const getUserByEmail = function(email) {
   return null;
 };
 
-// Users database
+// USERS DATABASE
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -34,19 +39,19 @@ const users = {
   },
 };
 
-// URLs Database
+// URLS DATABASE
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
-// middleware
+// MIDDLEWARE
 app.use(morgan("dev"));
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Homepage
+// HOMEPAGE
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -56,18 +61,19 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-// Hello page
+// HELLO page
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-// Register page
+// REGISTER page
 app.get("/register", (req, res) => {
   const user = users[req.cookies["user_id"]];
   const templateVars = { user: user };
   res.render("register", templateVars);
 });
 
+// REGISTER handler
 app.post("/register", (req, res) => {
   if (!req.body.email || !req.body.password) {
     res.statusCode = 400;
@@ -114,20 +120,20 @@ app.post("/login", (req, res) => {
   }
 });
 
-// LOGOUT button in Header
+// LOGOUT handler (button in Header)
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
-
-// Page to create a new URL
+// NEW URL page
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies["user_id"]];
   const templateVars = { user: user };
   res.render("urls_new", templateVars);
 });
 
+// NEW URL handler
 app.post("/urls", (req, res) => {
   let randomString = generateRandomString();
   urlDatabase[randomString] = req.body.longURL;
@@ -135,7 +141,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${randomString}`);
 });
 
-// Page displaying all URLs
+// URLS INDEX page
 app.get("/urls", (req, res) => {
   const user = users[req.cookies["user_id"]];
   const templateVars = {
@@ -145,7 +151,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-// Specific URL page
+// SPECIFIC URL page
 app.get("/urls/:id", (req, res) => {
   const user = users[req.cookies["user_id"]];
   const templateVars = {
@@ -156,24 +162,24 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-// Update a Long URL
+// UPDATE URL handler
 app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = req.body.longURL;
   res.redirect("/urls");
 });
 
-// Delete an URL
+// DELETE URL handler
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
 
-// Redirecting short URLs to their long URLs
+// REDIRECTING short URLs to their long URLs
 app.get("/u/:id", (req, res) => {
   res.redirect(urlDatabase[req.params.id]);
 });
 
-// GET Catchall
+// CATCHALL for pages that don't exist
 app.get('/*', (req, res) => {
   res.StatusCode = 404;
   res.send("Error: the page doesn't exist.");
