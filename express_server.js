@@ -56,6 +56,19 @@ const getUserByEmail = function(email) {
 };
 
 
+// Helper function that returns only the URLs that were created by the logged in User
+const urlsForUser = function(id) {
+  let result = {};
+  for (let url in urlDatabase) {
+    if (urlDatabase[url].userID === id) {
+      result[url] = urlDatabase[url];
+    }
+  }
+  return result;
+};
+
+
+
 // MIDDLEWARE
 app.use(morgan("dev"));
 app.set("view engine", "ejs");
@@ -152,6 +165,9 @@ app.get("/urls", (req, res) => {
     user: user,
     urls: urlDatabase
   };
+  if (!user) {    // Checking if user is not logged in
+    res.render("not_logged_in", templateVars);
+  }
   res.render("urls_index", templateVars);
 });
 
