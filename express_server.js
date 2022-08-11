@@ -90,13 +90,14 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-// Login page
+// LOGIN page
 app.get("/login", (req, res) => {
   const user = users[req.cookies["user_id"]];
   const templateVars = { user: user };
   res.render("login", templateVars);
 })
 
+// LOGIN handler
 app.post("/login", (req, res) => {
   const userLookup = getUserByEmail(req.body.email);
   if (userLookup === null) {
@@ -113,7 +114,7 @@ app.post("/login", (req, res) => {
   }
 });
 
-// Logout button in Header
+// LOGOUT button in Header
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/urls");
