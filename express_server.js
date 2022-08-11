@@ -51,7 +51,7 @@ app.use(cookieSession({
 
 // HOMEPAGE
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/login");
 });
 
 
