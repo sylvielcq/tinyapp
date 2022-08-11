@@ -2,6 +2,7 @@ const express = require("express");
 const morgan = require("morgan");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
+const { getUserByEmail } = require('./helpers');
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -43,17 +44,6 @@ const generateRandomString = function() {
     result += alphNum[j];
   }
   return result;
-};
-
-
-// Helper function that checks if an email already exists in the users database
-const getUserByEmail = function(email, database) {
-  for (let user in database) {
-    if (database[user]["email"] === email) {
-      return database[user];
-    }
-  }
-  return null;
 };
 
 
