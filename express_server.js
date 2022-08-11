@@ -2,9 +2,10 @@ const express = require("express");
 const morgan = require("morgan");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
-const { getUserByEmail } = require('./helpers');
+const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
+const methodOverride = require("method-override");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 
 
 // USERS DATABASE
@@ -35,34 +36,11 @@ const urlDatabase = {
 };
 
 
-// Helper function that generate short URLs IDs
-const generateRandomString = function() {
-  let alphNum = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    let j = Math.floor(Math.random() * (alphNum.length - 1));
-    result += alphNum[j];
-  }
-  return result;
-};
-
-
-// Helper function that returns only the URLs that were created by the logged in User
-const urlsForUser = function(id) {
-  let result = {};
-  for (let url in urlDatabase) {
-    if (urlDatabase[url].userID === id) {
-      result[url] = urlDatabase[url];
-    }
-  }
-  return result;
-};
-
-
 // MIDDLEWARE
 app.use(morgan("dev"));
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 app.use(cookieSession({
   name: 'session',
   keys: ['abracadabra', 'expelliarmus']
@@ -93,7 +71,7 @@ app.get("/hello", (req, res) => {
 app.get("/register", (req, res) => {
   let user = users[req.session["user_id"]];
 
-  if (user) {    // Checking if user is already logged in
+  if (user) {        // If user is already logged in
     return res.redirect("/urls");
   }
 
@@ -109,28 +87,23 @@ app.post("/register", (req, res) => {
   let newPassword = req.body.password;
 
   if (!newEmail || !newPassword) {    // If email or password are empty
-    res.statusCode = 400;
-    return res.send("ERROR: Email or Password cannot be empty. Please try again.");
+    return res.status(400).send("ERROR: Email or Password cannot be empty. Please try again.");
   }
 
   if (getUserByEmail(newEmail, users) !== null) {    // If email already exists in database
-    res.statusCode = 400;
-    return res.send("ERROR: This email is already registered. Please log in.");
+    return res.status(400).send("ERROR: This email is already registered. Please log in.");
   }
 
   bcrypt.genSalt(10)
     .then((salt) => {
-      console.log("salt :", salt);
       return bcrypt.hashSync(newPassword, salt);
     })
     .then((hash) => {
-      console.log("hash :", hash);
       users[randomId] = {
         id: randomId,
         email: newEmail,
         password: hash
       };
-      console.log("users db :", users);
       req.session["user_id"] = randomId;
       res.redirect("/urls");
     });
@@ -141,7 +114,7 @@ app.post("/register", (req, res) => {
 app.get("/login", (req, res) => {
   let user = users[req.session["user_id"]];
 
-  if (user) {    // Checking if user is already logged in
+  if (user) {     // If user is already logged in
     return res.redirect("/urls");
   }
 
@@ -155,16 +128,16 @@ app.post("/login", (req, res) => {
   const userLookup = getUserByEmail(req.body.email, users);
   const passwordCheck = bcrypt.compareSync(req.body.password, userLookup.password);
 
-  if (userLookup === null) {    // If the email doesn't exist in the Users database
-    res.statusCode = 403;
-    return res.send("We cannot find an account with this email address. Please try again, or register a new Account.");
+  if (userLookup === null) {     // If the email doesn't exist in the Users database
+    return res.status(403).send("We cannot find an account with this email address. Please try again, or register a new Account.");
   }
 
-  if (userLookup !== null) {    // If the email exists in the Users database
-    if (!passwordCheck) {    // If the password doesn't match with the password in the database
-      res.statusCode = 403;
-      return res.send("Incorrect password. Please try again.");
+  if (userLookup !== null) {     // If the email exists in the Users database
+
+    if (!passwordCheck) {        // But the password doesn't match with the password in the database
+      return res.status(403).send("Password incorrect. Please try again.");
     }
+
     req.session["user_id"] = userLookup.id;
     res.redirect("/urls");
   }
@@ -173,7 +146,7 @@ app.post("/login", (req, res) => {
 
 // LOGOUT handler (button in Header)
 app.post("/logout", (req, res) => {
-  delete req.session.user_id;
+  req.session = null;
   res.redirect("/urls");
 });
 
@@ -181,13 +154,13 @@ app.post("/logout", (req, res) => {
 // URLS INDEX page
 app.get("/urls", (req, res) => {
   let user = users[req.session["user_id"]];
-  let userUrls = urlsForUser(req.session["user_id"]);
+  let userUrls = urlsForUser(req.session["user_id"], urlDatabase);
   const templateVars = {
     user: user,
     urls: userUrls
   };
 
-  if (!user) {    // Checking if user is not logged in
+  if (!user) {                    // If user is not logged in
     return res.render("not_logged_in", templateVars);
   }
 
@@ -199,7 +172,7 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   let user = users[req.session["user_id"]];
 
-  if (!user) {    // Checking if user is not logged in
+  if (!user) {                    // If user is not logged in
     return res.redirect("/login");
   }
 
@@ -212,9 +185,9 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   let user = users[req.session["user_id"]];
 
-  if (!user) {    // Checking if user is not logged in
+  if (!user) {                     // If user is not logged in
     const templateVars = { user: user };
-    res.render("not_logged_in", templateVars);
+    return res.render("not_logged_in", templateVars);
   }
 
   let id = generateRandomString();
@@ -231,20 +204,19 @@ app.post("/urls", (req, res) => {
 // SPECIFIC URL page
 app.get("/urls/:id", (req, res) => {
   let user = users[req.session["user_id"]];
-  let userUrls = urlsForUser(req.session["user_id"]);
+  let userUrls = urlsForUser(req.session["user_id"], urlDatabase);
   const templateVars = {
     user: user,
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL
   };
 
-  if (!user) {    // Checking if user is not logged in
-    res.render("not_logged_in", templateVars);
+  if (!user) {                        // If user is not logged in
+    return res.render("not_logged_in", templateVars);
   }
 
-  if (!userUrls[req.params.id]) {    // If URL Id does not belong to the logged in user
-    res.StatusCode = 404;
-    res.render("404", templateVars);
+  if (!userUrls[req.params.id]) {     // If URL Id does not belong to the logged in user
+    return res.render("404", templateVars);
   }
 
   res.render("urls_show", templateVars);
@@ -252,24 +224,22 @@ app.get("/urls/:id", (req, res) => {
 
 
 // UPDATE URL handler
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   let user = users[req.session["user_id"]];
   let id = req.params.id;
-  let userUrls = urlsForUser(req.session["user_id"]);
+  let userUrls = urlsForUser(req.session["user_id"], urlDatabase);
   const templateVars = { user: user };
 
-  if (!urlDatabase[id]) {    // If URL Id does not exist
-    res.StatusCode = 404;
-    res.render("404", templateVars);
+  if (!urlDatabase[id]) {            // If URL Id does not exist
+    return res.status(404).render("404", templateVars);
   }
 
-  if (!user) {    // If user is not logged in
-    res.render("not_logged_in", templateVars);
+  if (!user) {                       // If user is not logged in
+    return res.render("not_logged_in", templateVars);
   }
 
   if (!userUrls[req.params.id]) {    // If URL Id does not belong to the logged in user
-    res.StatusCode = 404;
-    res.render("404", templateVars);
+    return res.render("404", templateVars);
   }
 
   let newLongURL = req.body.longURL;
@@ -277,30 +247,27 @@ app.post("/urls/:id", (req, res) => {
     longURL: newLongURL,
     userID: user.id
   };
-  console.log("URL Database: ", urlDatabase);
   res.redirect("/urls");
 });
 
 
 // DELETE URL handler
-app.post("/urls/:id/delete", (req, res) => {
+app.delete("/urls/:id/delete", (req, res) => {
   let user = users[req.session["user_id"]];
   let id = req.params.id;
-  let userUrls = urlsForUser(req.session["user_id"]);
+  let userUrls = urlsForUser(req.session["user_id"], urlDatabase);
   const templateVars = { user: user };
 
-  if (!urlDatabase[id]) {    // If URL Id does not exist
-    res.StatusCode = 404;
-    res.render("404", templateVars);
+  if (!urlDatabase[id]) {            // If URL Id does not exist
+    return res.status(404).render("404", templateVars);
   }
 
-  if (!user) {    // If user is not logged in
-    res.render("not_logged_in", templateVars);
+  if (!user) {                       // If user is not logged in
+    return res.render("not_logged_in", templateVars);
   }
 
   if (!userUrls[req.params.id]) {    // If URL Id does not belong to the logged in user
-    res.StatusCode = 404;
-    res.render("404", templateVars);
+    return res.render("404", templateVars);
   }
 
   delete urlDatabase[id];
@@ -312,11 +279,10 @@ app.post("/urls/:id/delete", (req, res) => {
 app.get("/u/:id", (req, res) => {
   let id = req.params.id;
 
-  if (!urlDatabase[id]) {
+  if (!urlDatabase[id]) {            // If URL Id does not exist
     let user = users[req.session["user_id"]];
     const templateVars = { user: user };
-    res.StatusCode = 404;
-    res.render("404", templateVars);
+    return res.status(404).render("404", templateVars);
   }
 
   res.redirect(urlDatabase[id].longURL);
@@ -327,12 +293,11 @@ app.get("/u/:id", (req, res) => {
 app.get('/*', (req, res) => {
   let user = users[req.session["user_id"]];
   const templateVars = { user: user };
-  res.StatusCode = 404;
-  res.render("404", templateVars);
+  res.status(404).render("404", templateVars);
 });
 
 
 // Server LISTEN
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Server listening on port ${PORT}!`);
 });
