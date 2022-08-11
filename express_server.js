@@ -101,7 +101,7 @@ app.get("/hello", (req, res) => {
 
 // REGISTER page
 app.get("/register", (req, res) => {
-  let user = users[req.cookies["user_id"]];
+  let user = users[req.session["user_id"]];
 
   if (user) {    // Checking if user is already logged in
     return res.redirect("/urls");
@@ -141,15 +141,15 @@ app.post("/register", (req, res) => {
         password: hash
       };
       console.log("users db :", users);
-      res.cookie("user_id", randomId);
+      req.session["user_id"] = randomId;
       res.redirect("/urls");
-    })
+    });
 });
 
 
 // LOGIN page
 app.get("/login", (req, res) => {
-  let user = users[req.cookies["user_id"]];
+  let user = users[req.session["user_id"]];
 
   if (user) {    // Checking if user is already logged in
     return res.redirect("/urls");
@@ -175,7 +175,7 @@ app.post("/login", (req, res) => {
       res.statusCode = 403;
       return res.send("Incorrect password. Please try again.");
     }
-    res.cookie("user_id", userLookup.id);
+    req.session["user_id"] = userLookup.id;
     res.redirect("/urls");
   }
 });
@@ -183,15 +183,15 @@ app.post("/login", (req, res) => {
 
 // LOGOUT handler (button in Header)
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  delete req.session.user_id;
   res.redirect("/urls");
 });
 
 
 // URLS INDEX page
 app.get("/urls", (req, res) => {
-  let user = users[req.cookies["user_id"]];
-  let userUrls = urlsForUser(req.cookies["user_id"]);
+  let user = users[req.session["user_id"]];
+  let userUrls = urlsForUser(req.session["user_id"]);
   const templateVars = {
     user: user,
     urls: userUrls
@@ -207,7 +207,7 @@ app.get("/urls", (req, res) => {
 
 // NEW URL page
 app.get("/urls/new", (req, res) => {
-  let user = users[req.cookies["user_id"]];
+  let user = users[req.session["user_id"]];
 
   if (!user) {    // Checking if user is not logged in
     return res.redirect("/login");
@@ -220,7 +220,7 @@ app.get("/urls/new", (req, res) => {
 
 // NEW URL handler
 app.post("/urls", (req, res) => {
-  let user = users[req.cookies["user_id"]];
+  let user = users[req.session["user_id"]];
 
   if (!user) {    // Checking if user is not logged in
     const templateVars = { user: user };
@@ -228,7 +228,7 @@ app.post("/urls", (req, res) => {
   }
 
   let id = generateRandomString();
-  let newUserId = req.cookies["user_id"];
+  let newUserId = req.session["user_id"];
   let newLongURL = req.body.longURL;
   urlDatabase[id] = {
     longURL: newLongURL,
@@ -240,8 +240,8 @@ app.post("/urls", (req, res) => {
 
 // SPECIFIC URL page
 app.get("/urls/:id", (req, res) => {
-  let user = users[req.cookies["user_id"]];
-  let userUrls = urlsForUser(req.cookies["user_id"]);
+  let user = users[req.session["user_id"]];
+  let userUrls = urlsForUser(req.session["user_id"]);
   const templateVars = {
     user: user,
     id: req.params.id,
@@ -263,9 +263,9 @@ app.get("/urls/:id", (req, res) => {
 
 // UPDATE URL handler
 app.post("/urls/:id", (req, res) => {
-  let user = users[req.cookies["user_id"]];
+  let user = users[req.session["user_id"]];
   let id = req.params.id;
-  let userUrls = urlsForUser(req.cookies["user_id"]);
+  let userUrls = urlsForUser(req.session["user_id"]);
   const templateVars = { user: user };
 
   if (!urlDatabase[id]) {    // If URL Id does not exist
@@ -287,16 +287,16 @@ app.post("/urls/:id", (req, res) => {
     longURL: newLongURL,
     userID: user.id
   };
-  console.log("URL Database: ", urlDatabase)
+  console.log("URL Database: ", urlDatabase);
   res.redirect("/urls");
 });
 
 
 // DELETE URL handler
 app.post("/urls/:id/delete", (req, res) => {
-  let user = users[req.cookies["user_id"]];
+  let user = users[req.session["user_id"]];
   let id = req.params.id;
-  let userUrls = urlsForUser(req.cookies["user_id"]);
+  let userUrls = urlsForUser(req.session["user_id"]);
   const templateVars = { user: user };
 
   if (!urlDatabase[id]) {    // If URL Id does not exist
@@ -323,7 +323,7 @@ app.get("/u/:id", (req, res) => {
   let id = req.params.id;
 
   if (!urlDatabase[id]) {
-    let user = users[req.cookies["user_id"]];
+    let user = users[req.session["user_id"]];
     const templateVars = { user: user };
     res.StatusCode = 404;
     res.render("404", templateVars);
@@ -335,7 +335,7 @@ app.get("/u/:id", (req, res) => {
 
 // CATCHALL for pages that don't exist
 app.get('/*', (req, res) => {
-  let user = users[req.cookies["user_id"]];
+  let user = users[req.session["user_id"]];
   const templateVars = { user: user };
   res.StatusCode = 404;
   res.render("404", templateVars);
