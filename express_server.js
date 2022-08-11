@@ -68,6 +68,9 @@ app.get("/hello", (req, res) => {
 
 // REGISTER page
 app.get("/register", (req, res) => {
+  if (req.cookies["user_id"]) {
+    res.redirect("/urls");
+  }
   const user = users[req.cookies["user_id"]];
   const templateVars = { user: user };
   res.render("register", templateVars);
@@ -98,6 +101,9 @@ app.post("/register", (req, res) => {
 
 // LOGIN page
 app.get("/login", (req, res) => {
+  if (req.cookies["user_id"]) {
+    res.redirect("/urls");
+  }
   const user = users[req.cookies["user_id"]];
   const templateVars = { user: user };
   res.render("login", templateVars);
