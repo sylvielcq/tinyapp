@@ -47,10 +47,10 @@ const generateRandomString = function() {
 
 
 // Helper function that checks if an email already exists in the users database
-const getUserByEmail = function(email) {
-  for (let user in users) {
-    if (users[user]["email"] === email) {
-      return users[user];
+const getUserByEmail = function(email, database) {
+  for (let user in database) {
+    if (database[user]["email"] === email) {
+      return database[user];
     }
   }
   return null;
@@ -123,7 +123,7 @@ app.post("/register", (req, res) => {
     return res.send("ERROR: Email or Password cannot be empty. Please try again.");
   }
 
-  if (getUserByEmail(newEmail) !== null) {    // If email already exists in database
+  if (getUserByEmail(newEmail, users) !== null) {    // If email already exists in database
     res.statusCode = 400;
     return res.send("ERROR: This email is already registered. Please log in.");
   }
@@ -162,7 +162,7 @@ app.get("/login", (req, res) => {
 
 // LOGIN handler
 app.post("/login", (req, res) => {
-  const userLookup = getUserByEmail(req.body.email);
+  const userLookup = getUserByEmail(req.body.email, users);
   const passwordCheck = bcrypt.compareSync(req.body.password, userLookup.password);
 
   if (userLookup === null) {    // If the email doesn't exist in the Users database
