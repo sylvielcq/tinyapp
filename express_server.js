@@ -61,18 +61,6 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-// Login form in Header
-app.post("/login", (req, res) => {
-  res.cookie("user_id", req.body.username);
-  res.redirect("/urls");
-});
-
-// Logout button in Header
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
-  res.redirect("/urls");
-});
-
 // Register page
 app.get("/register", (req, res) => {
   const user = users[req.cookies["user_id"]];
@@ -108,6 +96,29 @@ app.get("/login", (req, res) => {
   const templateVars = { user: user };
   res.render("login", templateVars);
 })
+
+app.post("/login", (req, res) => {
+  const userLookup = getUserByEmail(req.body.email);
+  if (userLookup === null) {
+    res.statusCode = 403;
+    res.send("We cannot find an account with this email address. Please try again, or register a new Account.")
+  }
+  if (userLookup !== null) {
+    if (req.body.password !== userLookup.password) {
+      res.statusCode = 403;
+      res.send("Incorrect password. Please try again.")
+    }
+    res.cookie("user_id", userLookup.id);
+    res.redirect("/urls");
+  }
+});
+
+// Logout button in Header
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id");
+  res.redirect("/urls");
+});
+
 
 // Page to create a new URL
 app.get("/urls/new", (req, res) => {
