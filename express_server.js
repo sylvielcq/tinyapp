@@ -60,18 +60,6 @@ app.get("/", (req, res) => {
 });
 
 
-// GET /urls.json
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-
-// HELLO page
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-
 // REGISTER page
 app.get("/register", (req, res) => {
   let user = users[req.session["user_id"]];
@@ -255,7 +243,7 @@ app.put("/urls/:id", (req, res) => {
     return res.render("404", templateVars);
   }
 
-  let newLongURL = req.body.longURL;
+  let newLongURL = req.body.longURL; // If user is logged in and owns the URL Id
   urlDatabase[id] = {
     longURL: newLongURL,
     userID: user.id
@@ -283,7 +271,7 @@ app.delete("/urls/:id/delete", (req, res) => {
     return res.render("404", templateVars);
   }
 
-  delete urlDatabase[id];
+  delete urlDatabase[id];            // If user is logged in and owns the URL Id
   res.redirect("/urls");
 });
 
@@ -292,13 +280,13 @@ app.delete("/urls/:id/delete", (req, res) => {
 app.get("/u/:id", (req, res) => {
   let id = req.params.id;
 
-  if (!urlDatabase[id]) {            // If URL Id does not exist
+  if (!urlDatabase[id]) {                 // If URL Id does not exist
     let user = users[req.session["user_id"]];
     const templateVars = { user: user };
     return res.status(404).render("404", templateVars);
   }
 
-  res.redirect(urlDatabase[id].longURL);
+  res.redirect(urlDatabase[id].longURL);  // If URL id is valid
 });
 
 
