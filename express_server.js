@@ -80,7 +80,9 @@ app.post("/register", (req, res) => {
   let newPassword = req.body.password;
 
   if (!newEmail || !newPassword) {    // If email or password are empty
-    return res.status(400).send("ERROR: Email or Password cannot be empty. Please try again.");
+    let user = users[req.session["user_id"]];
+    const templateVars = { user: user };
+    return res.status(400).render("error_no_email", templateVars);
   }
 
   if (getUserByEmail(newEmail, users) !== null) {    // If email already exists in database
@@ -128,7 +130,9 @@ app.post("/login", (req, res) => {
   if (userLookup !== null) {     // If the email exists in the Users database
 
     if (!passwordCheck) {        // But the password doesn't match with the password in the database
-      return res.status(403).send("Password incorrect. Please try again.");
+      let user = users[req.session["user_id"]];
+      const templateVars = { user: user };
+      return res.status(403).render("error_no_email", templateVars);
     }
 
     req.session["user_id"] = userLookup.id;  // If the email is valid, and the passwords match
@@ -154,7 +158,7 @@ app.get("/urls", (req, res) => {
   };
 
   if (!user) {                            // If user is not logged in
-    return res.render("not_logged_in", templateVars);
+    return res.render("error_not_logged_in", templateVars);
   }
 
   res.render("urls_index", templateVars); // If user is logged in
@@ -180,7 +184,7 @@ app.post("/urls", (req, res) => {
 
   if (!user) {                     // If user is not logged in
     const templateVars = { user: user };
-    return res.render("not_logged_in", templateVars);
+    return res.render("error_not_logged_in", templateVars);
   }
 
   let id = generateRandomString(); // If user is logged in
@@ -207,7 +211,7 @@ app.get("/urls/:id", (req, res) => {
 
   if (!user) {                 // If user is not logged in
     const templateVars = { user: user }
-    return res.render("not_logged_in", templateVars);
+    return res.render("error_not_logged_in", templateVars);
   }
 
   if (!userUrls[id]) {         // If URL Id does not belong to the logged in user
@@ -236,7 +240,7 @@ app.put("/urls/:id", (req, res) => {
   }
 
   if (!user) {                       // If user is not logged in
-    return res.render("not_logged_in", templateVars);
+    return res.render("error_not_logged_in", templateVars);
   }
 
   if (!userUrls[req.params.id]) {    // If URL Id does not belong to the logged in user
@@ -264,7 +268,7 @@ app.delete("/urls/:id/delete", (req, res) => {
   }
 
   if (!user) {                       // If user is not logged in
-    return res.render("not_logged_in", templateVars);
+    return res.render("error_not_logged_in", templateVars);
   }
 
   if (!userUrls[req.params.id]) {    // If URL Id does not belong to the logged in user
