@@ -132,7 +132,7 @@ app.post("/login", (req, res) => {
 
   if (userLookup !== null) {     // If the email exists in the Users database
     const passwordCheck = bcrypt.compareSync(req.body.password, userLookup.password);
-    
+
     if (!passwordCheck) {        // But the password doesn't match with the password in the database
       let user = users[req.session["user_id"]];
       const templateVars = { user: user };
@@ -220,7 +220,7 @@ app.get("/urls/:id", (req, res) => {
 
   if (!userUrls[id]) {         // If URL Id does not belong to the logged in user
     const templateVars = { user: user }
-    return res.render("error_404", templateVars);
+    return res.status(401).render("error_401", templateVars);
   }
 
   const templateVars = {       // If user is logged in and owns the URL Id
@@ -248,7 +248,7 @@ app.put("/urls/:id", (req, res) => {
   }
 
   if (!userUrls[req.params.id]) {    // If URL Id does not belong to the logged in user
-    return res.render("error_404", templateVars);
+    return res.status(401).render("error_401", templateVars);
   }
 
   let newLongURL = req.body.longURL; // If user is logged in and owns the URL Id
@@ -276,7 +276,7 @@ app.delete("/urls/:id/delete", (req, res) => {
   }
 
   if (!userUrls[req.params.id]) {    // If URL Id does not belong to the logged in user
-    return res.render("error_404", templateVars);
+    return res.status(401).render("error_401", templateVars);
   }
 
   delete urlDatabase[id];            // If user is logged in and owns the URL Id
