@@ -86,7 +86,9 @@ app.post("/register", (req, res) => {
   }
 
   if (getUserByEmail(newEmail, users) !== null) {    // If email already exists in database
-    return res.status(400).send("ERROR: This email is already registered. Please log in.");
+    let user = users[req.session["user_id"]];
+    const templateVars = { user: user };
+    return res.status(400).render("error_email_registered", templateVars);
   }
 
   bcrypt.genSalt(10)                  // Else
@@ -121,14 +123,16 @@ app.get("/login", (req, res) => {
 // LOGIN handler
 app.post("/login", (req, res) => {
   const userLookup = getUserByEmail(req.body.email, users);
-  const passwordCheck = bcrypt.compareSync(req.body.password, userLookup.password);
 
   if (userLookup === null) {     // If the email doesn't exist in the Users database
-    return res.status(403).send("We cannot find an account with this email address. Please try again, or register a new Account.");
+    let user = users[req.session["user_id"]];
+    const templateVars = { user: user };
+    return res.status(403).render("error_no_account", templateVars);
   }
 
   if (userLookup !== null) {     // If the email exists in the Users database
-
+    const passwordCheck = bcrypt.compareSync(req.body.password, userLookup.password);
+    
     if (!passwordCheck) {        // But the password doesn't match with the password in the database
       let user = users[req.session["user_id"]];
       const templateVars = { user: user };
