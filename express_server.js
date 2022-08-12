@@ -202,7 +202,7 @@ app.get("/urls/:id", (req, res) => {
   
   if (!urlDatabase[id]) {      // If URL Id does not exist
     const templateVars = { user: user }
-    return res.status(404).render("404", templateVars);
+    return res.status(404).render("error_404", templateVars);
   }
 
   if (!user) {                 // If user is not logged in
@@ -212,7 +212,7 @@ app.get("/urls/:id", (req, res) => {
 
   if (!userUrls[id]) {         // If URL Id does not belong to the logged in user
     const templateVars = { user: user }
-    return res.render("404", templateVars);
+    return res.render("error_404", templateVars);
   }
 
   const templateVars = {       // If user is logged in and owns the URL Id
@@ -232,7 +232,7 @@ app.put("/urls/:id", (req, res) => {
   const templateVars = { user: user };
 
   if (!urlDatabase[id]) {            // If URL Id does not exist
-    return res.status(404).render("404", templateVars);
+    return res.status(404).render("error_404", templateVars);
   }
 
   if (!user) {                       // If user is not logged in
@@ -240,7 +240,7 @@ app.put("/urls/:id", (req, res) => {
   }
 
   if (!userUrls[req.params.id]) {    // If URL Id does not belong to the logged in user
-    return res.render("404", templateVars);
+    return res.render("error_404", templateVars);
   }
 
   let newLongURL = req.body.longURL; // If user is logged in and owns the URL Id
@@ -260,7 +260,7 @@ app.delete("/urls/:id/delete", (req, res) => {
   const templateVars = { user: user };
 
   if (!urlDatabase[id]) {            // If URL Id does not exist
-    return res.status(404).render("404", templateVars);
+    return res.status(404).render("error_404", templateVars);
   }
 
   if (!user) {                       // If user is not logged in
@@ -268,7 +268,7 @@ app.delete("/urls/:id/delete", (req, res) => {
   }
 
   if (!userUrls[req.params.id]) {    // If URL Id does not belong to the logged in user
-    return res.render("404", templateVars);
+    return res.render("error_404", templateVars);
   }
 
   delete urlDatabase[id];            // If user is logged in and owns the URL Id
@@ -283,7 +283,7 @@ app.get("/u/:id", (req, res) => {
   if (!urlDatabase[id]) {                 // If URL Id does not exist
     let user = users[req.session["user_id"]];
     const templateVars = { user: user };
-    return res.status(404).render("404", templateVars);
+    return res.status(404).render("error_404", templateVars);
   }
 
   res.redirect(urlDatabase[id].longURL);  // If URL id is valid
@@ -294,7 +294,7 @@ app.get("/u/:id", (req, res) => {
 app.get('/*', (req, res) => {
   let user = users[req.session["user_id"]];
   const templateVars = { user: user };
-  res.status(404).render("404", templateVars);
+  res.status(404).render("error_404", templateVars);
 });
 
 
