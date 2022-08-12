@@ -207,19 +207,19 @@ app.get("/urls/:id", (req, res) => {
   let user = users[req.session["user_id"]];
   let userUrls = urlsForUser(req.session["user_id"], urlDatabase);
   let id = req.params.id;
-  
+
   if (!urlDatabase[id]) {      // If URL Id does not exist
-    const templateVars = { user: user }
+    const templateVars = { user: user };
     return res.status(404).render("error_404", templateVars);
   }
 
   if (!user) {                 // If user is not logged in
-    const templateVars = { user: user }
+    const templateVars = { user: user };
     return res.render("error_not_logged_in", templateVars);
   }
 
   if (!userUrls[id]) {         // If URL Id does not belong to the logged in user
-    const templateVars = { user: user }
+    const templateVars = { user: user };
     return res.status(401).render("error_401", templateVars);
   }
 
