@@ -39,7 +39,7 @@
               <td><%= id %></td>
               <td><%= urls[id].longURL %></td>
               <td>
-                <form action="/urls/<%= id %>">
+                <form action="/urls/<%= id %>" method="GET">
                   <button type="edit" class="btn btn-outline-primary">Edit</button>
                 </form>
               </td>
@@ -52,6 +52,11 @@
           <% } %>
         </tbody>
       </table>
+      <div>
+        <form action="/urls/new" method="GET">
+          <button type="submit" class="btn btn-warning btn-sm">Create a New Short Link</button>
+        </form>
+      </div>
     </main>
     <!-- Bootstrap JS -->
     <script

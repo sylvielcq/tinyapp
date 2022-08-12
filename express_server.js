@@ -51,6 +51,11 @@ app.use(cookieSession({
 
 // HOMEPAGE
 app.get("/", (req, res) => {
+  let user = users[req.session["user_id"]];
+
+  if (user) {        // If user is already logged in
+    return res.redirect("/urls");
+  }
   res.redirect("/login");
 });
 
