@@ -145,13 +145,6 @@ app.post("/login", (req, res) => {
 });
 
 
-// LOGOUT handler (button in Header)
-app.post("/logout", (req, res) => {
-  req.session = null;
-  res.redirect("/urls");
-});
-
-
 // URLS INDEX page
 app.get("/urls", (req, res) => {
   let user = users[req.session["user_id"]];
@@ -295,6 +288,13 @@ app.get("/u/:id", (req, res) => {
   }
 
   res.redirect(urlDatabase[id].longURL);  // If URL id is valid
+});
+
+
+// LOGOUT handler (button in Header)
+app.post("/logout", (req, res) => {
+  req.session = null;
+  res.redirect("/urls");
 });
 
 
