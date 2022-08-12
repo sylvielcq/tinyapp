@@ -53,10 +53,10 @@ app.use(cookieSession({
 app.get("/", (req, res) => {
   let user = users[req.session["user_id"]];
 
-  if (user) {        // If user is already logged in
+  if (user) {              // If user is already logged in
     return res.redirect("/urls");
   }
-  res.redirect("/login");
+  res.redirect("/login");  // If user is not logged in
 });
 
 
@@ -76,11 +76,11 @@ app.get("/hello", (req, res) => {
 app.get("/register", (req, res) => {
   let user = users[req.session["user_id"]];
 
-  if (user) {        // If user is already logged in
+  if (user) {                           // If user is already logged in
     return res.redirect("/urls");
   }
 
-  const templateVars = { user: user };
+  const templateVars = { user: user };  // If user is not logged in
   res.render("register", templateVars);
 });
 
@@ -99,7 +99,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("ERROR: This email is already registered. Please log in.");
   }
 
-  bcrypt.genSalt(10)
+  bcrypt.genSalt(10)                  // Else
     .then((salt) => {
       return bcrypt.hashSync(newPassword, salt);
     })
@@ -119,11 +119,11 @@ app.post("/register", (req, res) => {
 app.get("/login", (req, res) => {
   let user = users[req.session["user_id"]];
 
-  if (user) {     // If user is already logged in
+  if (user) {                          // If user is already logged in
     return res.redirect("/urls");
   }
 
-  const templateVars = { user: user };
+  const templateVars = { user: user }; // If user is not logged in
   res.render("login", templateVars);
 });
 
@@ -143,7 +143,7 @@ app.post("/login", (req, res) => {
       return res.status(403).send("Password incorrect. Please try again.");
     }
 
-    req.session["user_id"] = userLookup.id;
+    req.session["user_id"] = userLookup.id;  // If the email is valid, and the passwords match
     res.redirect("/urls");
   }
 });
@@ -165,11 +165,11 @@ app.get("/urls", (req, res) => {
     urls: userUrls
   };
 
-  if (!user) {                    // If user is not logged in
+  if (!user) {                            // If user is not logged in
     return res.render("not_logged_in", templateVars);
   }
 
-  res.render("urls_index", templateVars);
+  res.render("urls_index", templateVars); // If user is logged in
 });
 
 
@@ -177,11 +177,11 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   let user = users[req.session["user_id"]];
 
-  if (!user) {                    // If user is not logged in
+  if (!user) {                          // If user is not logged in
     return res.redirect("/login");
   }
 
-  const templateVars = { user: user };
+  const templateVars = { user: user };  // If user is logged in
   res.render("urls_new", templateVars);
 });
 
@@ -195,7 +195,7 @@ app.post("/urls", (req, res) => {
     return res.render("not_logged_in", templateVars);
   }
 
-  let id = generateRandomString();
+  let id = generateRandomString(); // If user is logged in
   let newUserId = req.session["user_id"];
   let newLongURL = req.body.longURL;
   urlDatabase[id] = {
@@ -210,20 +210,28 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let user = users[req.session["user_id"]];
   let userUrls = urlsForUser(req.session["user_id"], urlDatabase);
-  const templateVars = {
-    user: user,
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id].longURL
-  };
+  let id = req.params.id;
+  
+  if (!urlDatabase[id]) {      // If URL Id does not exist
+    const templateVars = { user: user }
+    return res.status(404).render("404", templateVars);
+  }
 
-  if (!user) {                        // If user is not logged in
+  if (!user) {                 // If user is not logged in
+    const templateVars = { user: user }
     return res.render("not_logged_in", templateVars);
   }
 
-  if (!userUrls[req.params.id]) {     // If URL Id does not belong to the logged in user
+  if (!userUrls[id]) {         // If URL Id does not belong to the logged in user
+    const templateVars = { user: user }
     return res.render("404", templateVars);
   }
 
+  const templateVars = {       // If user is logged in and owns the URL Id
+    user: user,
+    id: id,
+    longURL: urlDatabase[id].longURL
+  };
   res.render("urls_show", templateVars);
 });
 
